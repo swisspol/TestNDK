@@ -1,0 +1,39 @@
+apply plugin: 'com.android.model.application'
+
+model {
+    android {
+        compileSdkVersion = 23
+        buildToolsVersion = "23.0.0"
+
+        defaultConfig.with {
+            applicationId = "com.example.hellojni"
+            minSdkVersion.apiLevel = 4
+            targetSdkVersion.apiLevel = 23
+        }
+    }
+
+    compileOptions.with {
+        sourceCompatibility=JavaVersion.VERSION_1_7
+        targetCompatibility=JavaVersion.VERSION_1_7
+    }
+
+    // http://tools.android.com/tech-docs/new-build-system/gradle-experimental
+    android.ndk {
+        moduleName = "hello-jni"
+        ldLibs += ["z", "log", file("src/main/jni/libtest.a").absolutePath, file("libcurl/lib/libcurl.a").absolutePath, file("libssl/lib/libssl.a").absolutePath, file("libssl/lib/libcrypto.a").absolutePath]
+        CFlags += "-std=gnu99"
+        CFlags += "-I" + file("libcurl/include").absolutePath
+        CFlags += "-I" + file("libssl/include").absolutePath
+    }
+    android.buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles += file('proguard-rules.txt')
+        }
+    }
+    android.productFlavors {
+        create("arm7") {
+            ndk.abiFilters += "armeabi-v7a"
+        }
+    }
+}
