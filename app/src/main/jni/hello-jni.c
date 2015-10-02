@@ -56,7 +56,7 @@ static void TestCURL(JNIEnv* env, jobject objectOrClass, jstring arg) {
         abort();
     }
 
-    (*env)->CallStaticVoidMethod(env, _class, _method, (*env)->NewStringUTF(env, "DONE!"));
+    (*env)->CallStaticVoidMethod(env, _class, _method, (*env)->NewStringUTF(env, "Java call from JNI!"));
     if ((*env)->ExceptionCheck(env)) {
         (*env)->ExceptionClear(env);
     }

@@ -20,10 +20,13 @@ model {
     // http://tools.android.com/tech-docs/new-build-system/gradle-experimental
     android.ndk {
         moduleName = "hello-jni"
-        ldLibs += ["z", "log", file("libcurl/lib/libcurl.a").absolutePath, file("libssl/lib/libssl.a").absolutePath, file("libssl/lib/libcrypto.a").absolutePath]
+        ldLibs += ["z", "log",
+                   file("../curl-android-ndk/libcurl/lib/libcurl.a").absolutePath,
+                   file("../curl-android-ndk/libssl/lib/libssl.a").absolutePath,
+                   file("../curl-android-ndk/libssl/lib/libcrypto.a").absolutePath]
         CFlags += "-std=gnu99"
-        CFlags += "-I" + file("libcurl/include").absolutePath
-        CFlags += "-I" + file("libssl/include").absolutePath
+        CFlags += "-I" + file("../curl-android-ndk/libcurl/include").absolutePath
+        CFlags += "-I" + file("../curl-android-ndk/libssl/include").absolutePath
     }
     android.buildTypes {
         release {

@@ -1,0 +1,3 @@
+[submodule "curl-android-ndk"]
+	path = curl-android-ndk
+	url = https://github.com/swisspol/curl-android-ndk.git
