@@ -47,13 +47,13 @@ public class HelloJni extends Activity {
         setContentView(tv);
     }
 
-    public native String stringFromJNI(byte[] arg);
-
-    public native void testCURL(String s);
-
     public static void log(String s){
         Log.i("NATIVE", s);
     }
+
+    // Implemented in JNI
+    public native String stringFromJNI(byte[] arg);
+    public native void testCURL(String s);
 
     static {
         System.loadLibrary("hello-jni");

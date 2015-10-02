@@ -14,6 +14,9 @@
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 
+static jclass    _class;
+static jmethodID _method;
+
 static pthread_mutex_t* _openSSLMutexes;
 
 static void _OpenSSLLockingCallback(int mode, int n, const char* file, int line) {
@@ -24,7 +27,7 @@ static void _OpenSSLLockingCallback(int mode, int n, const char* file, int line)
     }
 }
 
-static void _TestCURL(JNIEnv* env, jobject objectOrClass, jstring arg) {
+static void TestCURL(JNIEnv* env, jobject objectOrClass, jstring arg) {
     const char* path = (*env)->GetStringUTFChars(env, arg, NULL);
 
     CURL *curl = curl_easy_init();
@@ -53,38 +56,61 @@ static void _TestCURL(JNIEnv* env, jobject objectOrClass, jstring arg) {
         abort();
     }
 
+    (*env)->CallStaticVoidMethod(env, _class, _method, (*env)->NewStringUTF(env, "DONE!"));
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+    }
+
     (*env)->ReleaseStringUTFChars(env, arg, path);
+}
+
+static jstring StringFromJNI(JNIEnv* env, jobject thiz, jbyteArray arg) {
+    jsize length = (*env)->GetArrayLength(env, arg);
+    jbyte* bytes = (*env)->GetByteArrayElements(env, arg, NULL);
+
+    char* buffer = malloc(1024);
+    snprintf(buffer, 1024, "Hello %.*s", length, bytes);
+    jstring temp = (*env)->NewStringUTF(env, buffer);  // Must be modified UTF8 (http://developer.android.com/training/articles/perf-jni.html#UTF_8_and_UTF_16_strings)
+    free(buffer);
+
+    // http://developer.android.com/training/articles/perf-jni.html#arrays
+    (*env)->ReleaseByteArrayElements(env, arg, bytes, JNI_ABORT);
+    return temp;
 }
 
 // https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html#wp276
 static JNINativeMethod methods[] = {
-        {"testCURL", "(Ljava/lang/String;)V", (void*)&_TestCURL},
+        {"testCURL", "(Ljava/lang/String;)V", (void*)&TestCURL},
+        {"stringFromJNI", "([B)Ljava/lang/String;", (void*)&StringFromJNI},
 };
 
-// From http://developer.android.com/training/articles/perf-jni.html#native_libraries
-// This is the recommended approach, but not the only approach. Explicit registration is not required,
-// nor is it necessary that you provide a JNI_OnLoad function. You can instead use "discovery" of native methods
-// that are named in a specific way (see the JNI spec for details), though this is less desirable
-// because if a method signature is wrong you won't know about it until the first time the method is actually used.
-
+// See http://developer.android.com/training/articles/perf-jni.html#native_libraries
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     JNIEnv* env;
     if ((*vm)->GetEnv(vm, &env, JNI_VERSION_1_6) != JNI_OK) {
         return -1;
     }
 
+    // Find Java class
     jclass class = (*env)->FindClass(env, "com/example/hellojni/HelloJni");
     if (class == NULL) {
         abort();
     }
+    _class = (*env)->NewGlobalRef(env, class);
+    (*env)->DeleteLocalRef(env, class);
 
-    jmethodID mid = (*env)->GetStaticMethodID(env, class, "log", "(Ljava/lang/String;)V");
-    (*env)->CallStaticVoidMethod(env, class, mid, (*env)->NewStringUTF(env, "HIT ME"));
-
-    if ((*env)->RegisterNatives(env, class, methods, sizeof(methods)/sizeof(methods[0])) != 0) {
+    // Register native methods
+    if ((*env)->RegisterNatives(env, _class, methods, sizeof(methods)/sizeof(methods[0])) != 0) {
         abort();
     }
 
+    // Cache static methods
+    _method = (*env)->GetStaticMethodID(env, _class, "log", "(Ljava/lang/String;)V");
+    if (_method == NULL) {
+        abort();
+    }
+
+    // Initialize OpenSSL
 #ifndef OPENSSL_THREADS
 #error OpenSSL built without threads
 #endif
@@ -103,18 +129,4 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     OPENSSL_config(NULL);
 
     return JNI_VERSION_1_6;
-}
-
-jstring Java_com_example_hellojni_HelloJni_stringFromJNI(JNIEnv* env, jobject thiz, jbyteArray arg) {
-    jsize length = (*env)->GetArrayLength(env, arg);
-    jbyte* bytes = (*env)->GetByteArrayElements(env, arg, NULL);
-
-    char* buffer = malloc(1024);
-    snprintf(buffer, 1024, "Hello %.*s", length, bytes);
-    jstring temp = (*env)->NewStringUTF(env, buffer);  // Must be modified UTF8 (http://developer.android.com/training/articles/perf-jni.html#UTF_8_and_UTF_16_strings)
-    free(buffer);
-
-    // http://developer.android.com/training/articles/perf-jni.html#arrays
-    (*env)->ReleaseByteArrayElements(env, arg, bytes, JNI_ABORT);
-    return temp;
 }
