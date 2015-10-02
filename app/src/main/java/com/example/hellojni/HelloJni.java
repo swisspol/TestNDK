@@ -56,6 +56,6 @@ public class HelloJni extends Activity {
     public native void testCURL(String s);
 
     static {
-        System.loadLibrary("hello-jni");
+        System.loadLibrary("jni");
     }
 }

@@ -19,7 +19,7 @@ model {
 
     // http://tools.android.com/tech-docs/new-build-system/gradle-experimental
     android.ndk {
-        moduleName = "hello-jni"
+        moduleName = "jni"
         ldLibs += ["z", "log",
                    file("../curl-android-ndk/libcurl/lib/libcurl.a").absolutePath,
                    file("../curl-android-ndk/libssl/lib/libssl.a").absolutePath,
