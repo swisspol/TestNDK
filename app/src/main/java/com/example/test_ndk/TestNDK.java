@@ -1,4 +1,4 @@
-package com.example.hellojni;
+package com.example.test_ndk;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
-public class HelloJni extends Activity {
+public class TestNDK extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

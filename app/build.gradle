@@ -6,7 +6,7 @@ model {
         buildToolsVersion = "23.0.0"
 
         defaultConfig.with {
-            applicationId = "com.example.hellojni"
+            applicationId = "com.example.test_ndk"
             minSdkVersion.apiLevel = 4
             targetSdkVersion.apiLevel = 23
         }

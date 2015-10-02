@@ -92,7 +92,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     }
 
     // Find Java class
-    jclass class = (*env)->FindClass(env, "com/example/hellojni/HelloJni");
+    jclass class = (*env)->FindClass(env, "com/example/test_ndk/TestNDK");
     if (class == NULL) {
         abort();
     }
