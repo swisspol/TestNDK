@@ -14,8 +14,6 @@
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 
-#include "test.h"
-
 static pthread_mutex_t* _openSSLMutexes;
 
 static void _OpenSSLLockingCallback(int mode, int n, const char* file, int line) {
@@ -24,10 +22,6 @@ static void _OpenSSLLockingCallback(int mode, int n, const char* file, int line)
     } else {
         pthread_mutex_unlock(&_openSSLMutexes[n]);
     }
-}
-
-static void _Ping(JNIEnv* env, jobject objectOrClass) {
-    __android_log_write(ANDROID_LOG_INFO, "JNI", "PING!");
 }
 
 static void _TestCURL(JNIEnv* env, jobject objectOrClass, jstring arg) {
@@ -64,11 +58,7 @@ static void _TestCURL(JNIEnv* env, jobject objectOrClass, jstring arg) {
 
 // https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html#wp276
 static JNINativeMethod methods[] = {
-        {"ping", "()V", (void*)&_Ping},
         {"testCURL", "(Ljava/lang/String;)V", (void*)&_TestCURL},
-//        {"wait",        "(J)V",                   (void *)&_Ping},
-//        {"notify",      "()I",                    (void *)&_Ping},
-//        {"clone",       "()Ljava/lang/Object;",   (void *)&_Ping},
 };
 
 // From http://developer.android.com/training/articles/perf-jni.html#native_libraries
@@ -94,8 +84,6 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     if ((*env)->RegisterNatives(env, class, methods, sizeof(methods)/sizeof(methods[0])) != 0) {
         abort();
     }
-
-//    test();
 
 #ifndef OPENSSL_THREADS
 #error OpenSSL built without threads

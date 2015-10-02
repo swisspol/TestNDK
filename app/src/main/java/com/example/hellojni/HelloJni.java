@@ -31,7 +31,7 @@ public class HelloJni extends Activity {
             in.close();
             out.flush();
             out.close();
-            Log.i("APP", "Cert copied to \"" + path + "\"");
+            Log.v("APP", "Cert copied to \"" + path + "\"");
 
             this.testCURL(path);
         } catch(Exception e) {
@@ -45,13 +45,9 @@ public class HelloJni extends Activity {
             e.printStackTrace();
         }
         setContentView(tv);
-
-        ping();
     }
 
     public native String stringFromJNI(byte[] arg);
-
-    public native void ping();
 
     public native void testCURL(String s);
 
